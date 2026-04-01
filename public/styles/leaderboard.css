@@ -1,0 +1,539 @@
+/* ─── CSS VARS (mirrored subset — no dependency on main.css) ─────────────── */
+:root {
+  --bg:          #07090f;
+  --surface:     #0f1520;
+  --surface2:    #141c2b;
+  --surface3:    #1a2235;
+  --border:      #1e2d42;
+  --border2:     #253650;
+  --text:        #e2eaf8;
+  --muted:       #4e6280;
+  --muted2:      #6b82a0;
+  --accent:      #ff5500;
+  --accent2:     #ff7733;
+  --accent-glow: rgba(255,85,0,.35);
+  --green:       #00e5a0;
+  --red:         #ff4455;
+  --gold:        #ffd700;
+  --silver:      #c0c8d8;
+  --bronze:      #cd7c2f;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* ─── FULL-PAGE BG2 BACKGROUND ───────────────────────────────────────────── */
+.lb-body {
+  min-height: 100vh;
+  font-family: 'Inter', system-ui, sans-serif;
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+/* ─── BG2 TRANSPARENCY CONTROLS ──────────────────────────────────────────
+   • Image blur  → change the blur() value below   (higher = more blurred)
+   • Image opacity → change opacity on ::before     (lower = more see-through)
+   • Dark overlay → change the 4th rgba value on ::after  (lower = brighter bg)
+   ──────────────────────────────────────────────────────────────────────── */
+
+/* bg2.webp — covers entire page, blurred */
+.lb-body::before {
+  content: '';
+  position: fixed;
+  inset: -40px;
+  background: url('/img/bg2.webp') center / cover no-repeat;
+  filter: blur(2px);          /* ← blur amount */
+  opacity: 1;                  /* ← image opacity (0–1) */
+  transform: scale(1.05);
+  z-index: -2;
+}
+
+/* Dark tint over the blurred image */
+.lb-body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: rgba(4, 6, 12, 0.2); /* ← last value = darkness (0=clear, 1=black) */
+  z-index: -1;
+}
+
+/* ─── FLOATING HEADER — fully transparent, logo left, VIP right ─────────── */
+.lb-header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 2rem;
+  /* intentionally no background, no blur, no border */
+}
+
+.lb-logo-link {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  opacity: 0.9;
+  transition: opacity 0.15s, filter 0.15s;
+}
+.lb-logo-link:hover {
+  opacity: 1;
+  filter: drop-shadow(0 0 10px rgba(200,0,20,0.7));
+}
+
+.lb-logo {
+  height: 77px;
+  width: auto;
+  filter: drop-shadow(0 0 8px rgba(200,0,20,0.55));
+}
+
+/* Round pill GET VIP button */
+.lb-vip-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: linear-gradient(135deg, #cc0018, #880010);
+  color: #fff;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 8px 20px;
+  border-radius: 50px;          /* full pill */
+  text-decoration: none;
+  box-shadow: 0 0 22px rgba(200,0,24,0.55), inset 0 1px 0 rgba(255,255,255,0.12);
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.lb-vip-pill:hover {
+  background: linear-gradient(135deg, #e8001e, #aa0014);
+  box-shadow: 0 0 38px rgba(200,0,24,0.8), inset 0 1px 0 rgba(255,255,255,0.15);
+  transform: translateY(-1px) scale(1.02);
+}
+.lb-vip-pill:active { transform: translateY(0) scale(1); }
+
+/* ─── HERO SECTION ───────────────────────────────────────────────────────── */
+.lb-hero {
+  padding-top: 120px; /* clear fixed header (logo 77px + 2×1.25rem padding) */
+  min-height: unset;  /* don't force full viewport — sit closer to list */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding-bottom: 2.5rem;
+}
+
+/* Live dot */
+.lb-live-dot {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-bottom: 2.5rem;
+}
+
+.lb-live-pulse {
+  width: 8px;
+  height: 8px;
+  background: var(--green);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--green);
+  animation: live-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes live-pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 6px var(--green); }
+  50%       { opacity: 0.5; box-shadow: 0 0 18px var(--green); }
+}
+
+.lb-live-label {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: var(--green);
+  text-transform: uppercase;
+}
+
+/* ─── PODIUM STAGE ───────────────────────────────────────────────────────── */
+.podium-stage {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;   /* stretch across full width */
+  width: 100%;
+  max-width: 860px;
+  padding: 0 2rem;
+  gap: 1.5rem;
+}
+
+.podium-player { display: flex; flex-direction: column; align-items: center; flex: 1; }
+
+/* Staircase offsets */
+.podium-1st { margin-top: 0; }
+.podium-2nd { margin-top: 55px; }
+.podium-3rd { margin-top: 100px; }
+
+/* ─── PLAYER CARD ────────────────────────────────────────────────────────── */
+.podium-card {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  cursor: default;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.podium-card:hover { transform: translateY(-6px) scale(1.02); }
+
+/* Card sizes — 1st largest, stepping down like the sketch */
+.podium-1st .podium-card { width: 100%; max-width: 260px; height: 300px; }
+.podium-2nd .podium-card { width: 100%; max-width: 230px; height: 265px; }
+.podium-3rd .podium-card { width: 100%; max-width: 200px; height: 235px; }
+
+/* Glassmorphism base */
+.podium-card {
+  background: rgba(14, 20, 34, 0.55);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+/* Rank-coloured borders + glows */
+.rank-gold {
+  border: 1px solid rgba(255,215,0,0.45);
+  box-shadow:
+    0 0 40px rgba(255,215,0,0.18),
+    0 0 80px rgba(255,215,0,0.07),
+    inset 0 0 20px rgba(255,215,0,0.04);
+}
+.rank-gold:hover {
+  box-shadow:
+    0 0 60px rgba(255,215,0,0.35),
+    0 0 120px rgba(255,215,0,0.12),
+    inset 0 0 30px rgba(255,215,0,0.07);
+}
+
+.rank-silver {
+  border: 1px solid rgba(192,200,216,0.35);
+  box-shadow:
+    0 0 30px rgba(192,200,216,0.12),
+    0 0 60px rgba(192,200,216,0.05),
+    inset 0 0 16px rgba(192,200,216,0.03);
+}
+.rank-silver:hover {
+  box-shadow: 0 0 50px rgba(192,200,216,0.25), inset 0 0 20px rgba(192,200,216,0.06);
+}
+
+.rank-bronze {
+  border: 1px solid rgba(205,124,47,0.35);
+  box-shadow:
+    0 0 24px rgba(205,124,47,0.12),
+    0 0 50px rgba(205,124,47,0.05),
+    inset 0 0 14px rgba(205,124,47,0.03);
+}
+.rank-bronze:hover {
+  box-shadow: 0 0 40px rgba(205,124,47,0.25), inset 0 0 18px rgba(205,124,47,0.06);
+}
+
+/* Top-left rank badge */
+.podium-card-rank {
+  position: absolute;
+  top: 10px; left: 10px;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 3px 8px;
+  border-radius: 5px;
+  z-index: 10;
+  backdrop-filter: blur(6px);
+}
+
+.podium-card-rank.gold   { background: rgba(255,215,0,0.18); color: var(--gold);   border: 1px solid rgba(255,215,0,0.35); }
+.podium-card-rank.silver { background: rgba(192,200,216,0.15); color: var(--silver); border: 1px solid rgba(192,200,216,0.3); }
+.podium-card-rank.bronze { background: rgba(205,124,47,0.15); color: var(--bronze); border: 1px solid rgba(205,124,47,0.3); }
+
+/* Crown emoji for 1st place */
+.podium-crown {
+  position: absolute;
+  top: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.5rem;
+  filter: drop-shadow(0 0 10px rgba(255,215,0,0.8));
+  animation: crown-float 3s ease-in-out infinite;
+  z-index: 20;
+}
+@keyframes crown-float {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50%       { transform: translateX(-50%) translateY(-6px); }
+}
+
+/* ─── AVATAR AREA (square, fills card body) ──────────────────────────────── */
+.podium-avatar-area {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.podium-avatar-area img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  display: block;
+  transition: transform 0.4s ease;
+}
+.podium-card:hover .podium-avatar-area img { transform: scale(1.06); }
+
+/* Gradient overlay so footer text is legible */
+.podium-avatar-area::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 55%;
+  background: linear-gradient(to top, rgba(4,6,12,0.9) 0%, transparent 100%);
+  pointer-events: none;
+}
+
+/* Scan-line effect on hover */
+.podium-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(255,255,255,0.018) 2px,
+    rgba(255,255,255,0.018) 4px
+  );
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s;
+  z-index: 5;
+}
+.podium-card:hover::after { opacity: 1; }
+
+/* ─── PLACEHOLDER (no avatar / no data) ─────────────────────────────────── */
+.podium-card--placeholder .podium-avatar-area,
+.podium-placeholder-inner {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.02);
+}
+
+.podium-placeholder-inner {
+  flex: 1;
+  border-bottom: 1px dashed rgba(255,255,255,0.08);
+}
+
+.podium-placeholder-icon {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.1);
+  user-select: none;
+}
+
+/* ─── CARD FOOTER ────────────────────────────────────────────────────────── */
+.podium-card-footer {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  padding: 8px 10px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.podium-name {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.podium-name.muted { color: rgba(255,255,255,0.25); font-weight: 500; }
+
+.podium-stat-row {
+  display: flex;
+  gap: 6px;
+  font-size: 0.68rem;
+  color: rgba(255,255,255,0.5);
+}
+
+.podium-stat-kills { font-weight: 600; color: rgba(255,255,255,0.75); }
+.podium-stat-kd-good { color: var(--green); font-weight: 700; }
+
+/* VIP tag inside card */
+.podium-vip-tag {
+  position: absolute;
+  top: 10px; right: 10px;
+  font-size: 0.55rem;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  background: rgba(255,85,0,0.2);
+  color: var(--accent2);
+  border: 1px solid rgba(255,85,0,0.3);
+  backdrop-filter: blur(4px);
+  z-index: 10;
+}
+
+/* ─── LIST SECTION ───────────────────────────────────────────────────────── */
+/* ↓ transparency knob — lower 4th value = more see-through (0=clear, 1=solid) */
+.lb-list-section {
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255,255,255,0.08);
+  padding: 1.25rem 2rem 15rem; /* ← top padding = gap from cards */
+  position: relative;
+  z-index: 10;
+}
+
+.lb-list-head {
+  max-width: 960px;
+  margin: 0 auto 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.lb-list-title {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: rgba(255,255,255,0.3);
+  text-transform: uppercase;
+}
+
+.lb-list-count { font-size: 0.75rem; color: var(--muted); }
+
+.lb-table-wrap {
+  max-width: 960px;
+  margin: 0 auto;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px;
+  overflow: hidden;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.lb-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  min-width: 520px;
+}
+
+.lb-table thead tr {
+  background: rgba(255,255,255,0.03);
+}
+
+.lb-table th {
+  text-align: left;
+  padding: 11px 16px;
+  color: rgba(255,255,255,0.45);  /* ← header label brightness */
+  font-weight: 600;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.lb-table td {
+  padding: 11px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  color: rgba(226, 234, 248, 0.92); /* ← row text brightness */
+  transition: background 0.1s;
+}
+
+.lb-table tbody tr:last-child td { border-bottom: none; }
+
+.lb-table tbody tr:hover td {
+  background: rgba(255,255,255,0.06);
+}
+
+.lb-vip-row td { background: rgba(255,85,0,0.025); }
+.lb-vip-row:hover td { background: rgba(255,85,0,0.06) !important; }
+
+.lb-cell-player { display: flex; align-items: center; gap: 10px; }
+
+.lb-cell-avatar {
+  width: 28px; height: 28px;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.1);
+  flex-shrink: 0;
+  object-fit: cover;
+}
+
+.lb-cell-name { font-weight: 600; color: #fff; text-shadow: 0 0 12px rgba(255,255,255,0.12); }
+
+.lb-cell-empty {
+  text-align: center;
+  padding: 3rem !important;
+  color: var(--muted);
+}
+
+.lb-kd-good { color: var(--green); font-weight: 700; text-shadow: 0 0 10px rgba(0,229,160,0.35); }
+.lb-kd-bad  { color: var(--red); font-weight: 600; }
+.lb-hs      { color: rgba(255,255,255,0.4); }
+
+.rank-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px; height: 24px;
+  border-radius: 5px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-family: 'Rajdhani', sans-serif;
+  background: rgba(255,255,255,0.05);
+  color: rgba(255,255,255,0.35);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+/* ─── ENTRANCE ANIMATIONS ────────────────────────────────────────────────── */
+@keyframes card-in {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.podium-player { animation: card-in 0.5s ease both; }
+.podium-1st    { animation-delay: 0.1s; }
+.podium-2nd    { animation-delay: 0.25s; }
+.podium-3rd    { animation-delay: 0.4s; }
+
+/* ─── MOBILE ─────────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .lb-header { padding: 0 1rem; }
+  .lb-header-center { display: none; }
+  .lb-logo { height: 24px; }
+
+  .podium-stage { gap: 1rem; }
+
+  .podium-stage { padding: 0 1rem; gap: 0.75rem; }
+  .podium-1st .podium-card { max-width: 100%; height: 180px; }
+  .podium-2nd .podium-card { max-width: 100%; height: 158px; }
+  .podium-3rd .podium-card { max-width: 100%; height: 140px; }
+
+  .podium-2nd { margin-top: 30px; }
+  .podium-3rd { margin-top: 58px; }
+
+  .lb-list-section { padding: 1.5rem 1rem 3rem; }
+
+  .lb-vip-pill { padding: 7px 14px; font-size: 0.78rem; letter-spacing: 1.5px; }
+}

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>2Hype — Leaderboard</title>
+  <link rel="icon" type="image/png" href="/img/2h%20logo.png" />
+  <link rel="stylesheet" href="/styles/leaderboard.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="lb-body">
+
+  <!-- ─── FLOATING HEADER ──────────────────────────────────────────────────── -->
+  <header class="lb-header">
+    <a href="/" class="lb-logo-link">
+      <img src="/img/2h%20logo.png" alt="2Hype" class="lb-logo" />
+    </a>
+    <a href="/vip" class="lb-vip-pill">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+      </svg>
+      GET VIP
+    </a>
+  </header>
+
+  <!-- ─── HERO: bg2 covers full area, 3 staircase cards ───────────────────── -->
+  <section class="lb-hero">
+    <!-- Live indicator -->
+    <div class="lb-live-dot">
+      <span class="lb-live-pulse"></span>
+      <span class="lb-live-label" id="live-text">LIVE</span>
+    </div>
+
+    <!-- The 3 podium player cards — staircase left → right → lower -->
+    <div class="podium-stage" id="podium-container">
+      <!-- Placeholder cards shown before data loads -->
+      <div class="podium-player podium-1st">
+        <div class="podium-card podium-card--placeholder rank-gold">
+          <span class="podium-card-rank gold">01</span>
+          <div class="podium-placeholder-inner">
+            <div class="podium-placeholder-icon">?</div>
+          </div>
+          <div class="podium-card-footer">
+            <span class="podium-name muted">Waiting...</span>
+          </div>
+        </div>
+      </div>
+      <div class="podium-player podium-2nd">
+        <div class="podium-card podium-card--placeholder rank-silver">
+          <span class="podium-card-rank silver">02</span>
+          <div class="podium-placeholder-inner">
+            <div class="podium-placeholder-icon">?</div>
+          </div>
+          <div class="podium-card-footer">
+            <span class="podium-name muted">Waiting...</span>
+          </div>
+        </div>
+      </div>
+      <div class="podium-player podium-3rd">
+        <div class="podium-card podium-card--placeholder rank-bronze">
+          <span class="podium-card-rank bronze">03</span>
+          <div class="podium-placeholder-inner">
+            <div class="podium-placeholder-icon">?</div>
+          </div>
+          <div class="podium-card-footer">
+            <span class="podium-name muted">Waiting...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── TOP PLAYERS LIST ─────────────────────────────────────────────────── -->
+  <section class="lb-list-section">
+    <div class="lb-list-head">
+      <span class="lb-list-title">TOP PLAYERS</span>
+      <span class="lb-list-count" id="lb-count">—</span>
+    </div>
+    <div class="lb-table-wrap">
+      <table class="lb-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Player</th>
+            <th>Kills</th>
+            <th>Deaths</th>
+            <th>K/D</th>
+            <th>HS%</th>
+            <th>Dmg</th>
+          </tr>
+        </thead>
+        <tbody id="lb-body">
+          <tr><td colspan="7" class="lb-cell-empty">
+            <div class="loading-spinner"></div>
+          </td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- loading-spinner used in JS too — define it via main.css -->
+  <style>
+    .loading-spinner{width:26px;height:26px;border:2px solid rgba(255,255,255,.12);border-top-color:#ff5500;border-radius:50%;animation:spin .7s linear infinite;margin:0 auto}
+    @keyframes spin{to{transform:rotate(360deg)}}
+  </style>
+
+  <script src="/js/leaderboard.js"></script>
+</body>
+</html>

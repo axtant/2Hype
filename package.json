@@ -1,8 +1,8 @@
 {
-  "name": "steam-auth-app",
+  "name": "2hype-v2",
   "version": "1.0.0",
-  "description": "Steam authentication web app with friends list access",
-  "main": "server.js",
+  "description": "2Hype - CS2 DM Leaderboard, Server Plans & VIP",
+  "main": "server/server.js",
   "scripts": {
     "dev": "nodemon server/server.js",
     "start": "node server/server.js",
@@ -19,8 +19,7 @@
     "express-session": "^1.17.3",
     "passport": "^0.6.0",
     "passport-steam": "^1.0.17",
-    "prisma": "^5.6.0",
-    "socket.io": "^4.8.1"
+    "prisma": "^5.6.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"

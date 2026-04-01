@@ -1,90 +1,76 @@
-// Generator/client
 generator client {
   provider = "prisma-client-js"
 }
 
-// Data source (PostgreSQL)
-// Supports both direct connection (DATABASE_URL) and pooled connection (DATABASE_POOL_URL)
-// The Prisma client will prefer DATABASE_POOL_URL if available, otherwise use DATABASE_URL
-// For Cloudflare Workers or connection poolers, use DATABASE_POOL_URL
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL") // Base URL - client code handles pool URL preference
+  provider = "mysql"
+  url      = env("DATABASE_URL")
 }
 
-// User Model
 model User {
-  id              String        @id @default(cuid())
-  steamId         String        @unique @map("steam_id")
-  displayName     String        @map("display_name")
-  avatarUrl       String?       @map("avatar_url")
-  profileUrl      String        @map("profile_url")
-  realName        String?       @map("real_name")
-  country         String?
-  state           String?
-  city            String?
-  friendsListAccess Boolean     @default(false) @map("friends_list_access")
-  createdAt       DateTime      @default(now()) @map("created_at")
-  updatedAt       DateTime      @updatedAt @map("updated_at")
-  lastLoginAt     DateTime?     @map("last_login_at")
+  id           String    @id @default(cuid())
+  steamId      String    @unique
+  displayName  String
+  avatarUrl    String?   @db.Text
+  profileUrl   String    @db.Text
+  isVip        Boolean   @default(false)
+  vipExpiresAt DateTime?
+  createdAt    DateTime  @default(now())
+  lastLoginAt  DateTime?
 
-  // Relations
-  friends     Friend[]
-  matches     Match[]       @relation("MatchPlayers")
-  matchQueue  MatchQueue?
-
-  @@map("users")
+  subscription Subscription?
+  orders       Order[]
+  dmStats      DmStat[]
 }
 
-// Friend Model
-model Friend {
-  id           String   @id @default(cuid())
-  userId       String   @map("user_id")
-  steamId      String   @map("steam_id")
-  displayName  String   @map("display_name")
-  avatarUrl    String?  @map("avatar_url")
-  profileUrl   String   @map("profile_url")
-  friendSince  DateTime?@map("friend_since")
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
-
-  @@unique([userId, steamId])
-  @@map("friends")
-} 
-
-enum MatchStatus {
-  pending
-  ready
-  started
-  finished
-  cancelled
+enum SubscriptionStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
 }
 
-// Match Model
-model Match {
-  id        String    @id @default(cuid())
-  players   User[]    @relation("MatchPlayers")
-  accepted  String[]  @default([])
-  declined  String[]  @default([])
-  maps      String[]  @default([])
-  vetoed    String[]  @default([])
-  status    MatchStatus @default(pending)
-  createdAt DateTime  @default(now())
-
-  // Relation
-
-
-  @@map("matches")
+model Subscription {
+  id        String             @id @default(cuid())
+  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String             @unique
+  plan      String
+  status    SubscriptionStatus @default(ACTIVE)
+  startedAt DateTime           @default(now())
+  expiresAt DateTime?
 }
 
-// MatchQueue Model
-model MatchQueue {
-  id       String   @id @default(cuid())
-  user     User     @relation(fields: [userId], references: [id])
-  userId   String   @unique
-  joinedAt DateTime @default(now())
-
-  @@map("match_queue")
+enum OrderStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
 }
 
+model Order {
+  id          String      @id @default(cuid())
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  plan        String
+  amountCents Int
+  status      OrderStatus @default(PENDING)
+  createdAt   DateTime    @default(now())
+  completedAt DateTime?
+
+  @@index([userId])
+}
+
+model DmStat {
+  id         String   @id @default(cuid())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String
+  steamId    String
+  kills      Int      @default(0)
+  deaths     Int      @default(0)
+  headshots  Int      @default(0)
+  damage     Int      @default(0)
+  map        String?
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([steamId])
+}

@@ -1,83 +1,80 @@
-const express = require('express');
-const session = require('express-session');
-const path = require('path');
-const cors = require('cors');
 require('dotenv').config();
 
-const http = require('http');
-const { Server } = require('socket.io');
-
+const path = require('path');
+const https = require('https');
+const express = require('express');
+const session = require('express-session');
+const cors = require('cors');
 const passport = require('./services/steamAuthService');
-const testGuestAuth = require('./middleware/testGuestAuth');
+
 const authController = require('./controllers/authController');
 const userController = require('./controllers/userController');
+const leaderboardController = require('./controllers/leaderboardController');
+const plansController = require('./controllers/plansController');
+const paymentController = require('./controllers/paymentController');
 const ensureAuthenticated = require('./middleware/ensureAuthenticated');
-const socketHandlers = require('./sockets/socketHandlers');
-const lobbySocketHandler = require('./lobby/lobbySocketHandler');
-
-const queueManager = require('./services/queueManager');
 
 const app = express();
-const server = http.createServer(app);
-const io = new Server(server, { cors: { origin: '*' } });
-// --- SESSION SETUP ---
-const sessionMiddleware = session({
+const PORT = process.env.PORT || 3000;
+
+app.use(cors({ origin: '*' }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static('public'));
+
+app.use(session({
   secret: process.env.SESSION_SECRET || 'change_this_secret',
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: process.env.NODE_ENV === 'production', maxAge: 86400 * 1000 },
-});
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 86400000,
+  },
+}));
 
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, '..', 'public')));
-app.use(sessionMiddleware);
-// In test mode, pre-seed a guest user into the session before passport.session
-app.use(testGuestAuth.http);
 app.use(passport.initialize());
 app.use(passport.session());
 
-// --- SHARE SESSION + PASSPORT WITH SOCKET.IO ---
-io.use((socket, next) => sessionMiddleware(socket.request, {}, next));
-io.use((socket, next) => testGuestAuth.socket(socket, next));
-io.use((socket, next) => passport.initialize()(socket.request, {}, next));
-io.use((socket, next) => passport.session()(socket.request, {}, next));
-
-// --- SOCKET HANDLERS ---
-io.on('connection', (socket) => socketHandlers(socket, io, queueManager));
-
-// Register lobby socket handlers AFTER session/passport are attached
-lobbySocketHandler(io);
-
-// --- ROUTES ---
+// Auth
 app.get('/auth/steam', authController.getSteamAuth);
 app.get('/auth/steam/return', authController.getSteamReturn);
-app.post('/logout', (req, res) => {
-  req.logout((err) => {
-    if (err) return res.status(500).json({ error: 'Logout failed' });
-    req.session.destroy(() => {
-      res.clearCookie('connect.sid');
-      res.sendStatus(200);
+app.post('/logout', authController.logout);
+
+// User
+app.get('/api/user', userController.getUser);
+
+// Leaderboard
+app.get('/api/leaderboard', leaderboardController.getLeaderboard);
+app.post('/api/stats', leaderboardController.pushStats); // called from CS2 server
+
+// Plans
+app.get('/api/plans', plansController.getPlans);
+app.post('/api/plans/buy', ensureAuthenticated, plansController.buyPlan);
+app.get('/api/plans/me', ensureAuthenticated, plansController.myPlan);
+
+// Payment (Razorpay — requires npm install razorpay + env vars)
+app.post('/api/payment/create-order', ensureAuthenticated, paymentController.createOrder);
+
+// Steam profile proxy — returns avatarUrl + displayName for a vanity URL
+app.get('/api/steamprofile/:vanity', (req, res) => {
+  const vanity = encodeURIComponent(req.params.vanity);
+  const url = `https://steamcommunity.com/id/${vanity}?xml=1`;
+  https.get(url, { headers: { 'User-Agent': 'Mozilla/5.0' } }, (steam) => {
+    let body = '';
+    steam.on('data', (chunk) => { body += chunk; });
+    steam.on('end', () => {
+      const avatar = (body.match(/<avatarFull><!\[CDATA\[(.*?)\]\]><\/avatarFull>/) || [])[1] || null;
+      const name   = (body.match(/<steamID><!\[CDATA\[(.*?)\]\]><\/steamID>/)       || [])[1] || 'Unknown';
+      res.json({ avatarUrl: avatar, displayName: name });
     });
-  });
+  }).on('error', () => res.json({ avatarUrl: null, displayName: 'Unknown' }));
 });
 
-app.get('/api/user', ensureAuthenticated, userController.getUserProfile);
-app.post('/api/grant-friends-access', ensureAuthenticated, userController.grantFriendsAccess);
-app.get('/api/friends', ensureAuthenticated, userController.getFriendsList);
+// Page routes (clean URLs without .html)
+app.get('/leaderboard', (req, res) => res.sendFile(path.join(__dirname, '../public/leaderboard.html')));
+app.get('/vip', (req, res) => res.sendFile(path.join(__dirname, '../public/vip.html')));
+app.get('/about', (req, res) => res.sendFile(path.join(__dirname, '../public/about.html')));
 
-const matchmakingController = require('./controllers/matchmakingController')(io, queueManager);
-
-app.post('/api/matchmaking/start', ensureAuthenticated, matchmakingController.startMatchmaking);
-app.post('/api/matchmaking/leave', ensureAuthenticated, matchmakingController.leaveMatchmaking);
-app.get('/api/matchmaking/status', ensureAuthenticated, matchmakingController.getMatchmakingStatus);
-
-// Serve static pages
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, '..', 'public', 'dashboard.html')));
-
-// --- SERVER START ---
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`🚀 Server listening on port ${PORT}`));
-
-module.exports = io;
+app.listen(PORT, () => {
+  console.log(`2Hype v2 running on http://localhost:${PORT}`);
+});
